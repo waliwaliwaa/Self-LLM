@@ -57,12 +57,12 @@ class Attention(nn.Module):
         self.token_length = token_length
         self.dropout = dropout
 
-        self.key_layer = nn.Linear(in_features=self.d_model, out_features=self.head_sizem, bias=False)
+        self.key_layer = nn.Linear(in_features=self.d_model, out_features=self.head_size, bias=False)
         self.query_layer = nn.Linear(in_features=self.d_model, out_features=self.head_size, bias=False)
         self.value_layer = nn.Linear(in_features=self.d_model, out_features=self.head_size, bias=False)
 
         self.register_buffer('tril', torch.tril(
-            torch.ones((self.context_length, self.context_length))))  # Lower triangular mask
+            torch.ones((self.token_length, self.token_length))))  # Lower triangular mask
         
         self.dropout_layer = nn.Dropout(self.dropout)
 
@@ -191,7 +191,7 @@ def get_batch(split: str):
     data = train_data if split == 'train' else validation_data
     idxs = torch.randint(low=0, high=len(data) - token_length, size=(batch_size, ))
     x = torch.stack([data[idx: idx + token_length] for idx in idxs]).to(device)
-    x = torch.stack([data[idx + 1: idx + token_length + 1] for idx in idxs]).to(device)
+    y = torch.stack([data[idx + 1: idx + token_length + 1] for idx in idxs]).to(device)
     return x, y
 
 @torch.no_grad()
