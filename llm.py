@@ -182,6 +182,7 @@ class TransformerLanguageModel(nn.Module):
             B, T, C = logits.shape
             logits_reshaped = logits.view(B * T, C)
             targets_reshaped = targets.view(B * T)
+            # cross entropy automatically do a softmax function
             loss = F.cross_entropy(input=logits_reshaped, target=targets_reshaped)
         else:
             loss = None
@@ -250,3 +251,14 @@ for step in range(max_iters):
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
     optimizer.step()
+
+
+# Generate
+model.eval()
+start = 'The book'
+start_ids = encoding.encode(start)
+x = (torch.tensor(start_ids, dtype=torch.long, device=device)[None, ...])
+y = model.generate(x, max_new_tokens=100)
+print('---------------')
+print(encoding.decode(y[0].tolist()))
+print('---------------')
